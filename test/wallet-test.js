@@ -205,26 +205,3 @@ describe("DemoWarmWallet", function () {
     });
 
 });
-
-// DONE admin can do any transaction size
-// DONE member cannot do transaction size > transaction limit
-// DONE member can do transaction size <= transaction limit
-// DONE unauthorized cannot do transaction size <= transaction limit
-// DONE admin can do multiple transaction to go past daily limit
-// DONE member cannot do transaction to go past daily limit
-// DONE admin can change transaction limit
-// DONE member cannot change transaction limit
-// DONE unauthorized cannot change transaction limit
-// DONE admin can change daily limit
-// DONE member cannot change daily limit
-// DONE unauthorized cannot change daily limit
-// DONE admin can eject member
-// DONE admin cannot eject admin
-// DONE member cannot eject member
-// DONE unauthorized cannot eject member
-// DONE admin can add member
-// DONE admin cannot add admin to member
-// DONE member cannot add member
-// DONE unauthorized cannot add member
-// 0 transaction limit ignores transaction limit rule
-// 0 daily limit ignores daily limit rule
