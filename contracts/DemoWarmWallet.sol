@@ -7,14 +7,14 @@ contract DemoWarmWallet {
     // Roles for each address. Default is UNAUTHORIZED.
     mapping (address => Role) roles;
 
-    // How much user spent on given day.
+    // How much this wallet spent on each given day.
     mapping (uint => uint) dailySpend;
 
     // Nonce to prevent replay attacks.
     uint public nonce;
 
     // Single transaction limit.
-    // TODO(renzo): Rule for general transactions.
+    // TODO(renzo): Figure out rules for general transactions.
     uint public transactionLimit;
     
     // Daily transaction limit.
@@ -49,13 +49,8 @@ contract DemoWarmWallet {
         return false;
     }
 
-    // An execution triggered from a cold wallet. Goes through without checks for approval requirement.
+    // Checks for requirements, then executes the wrapped transaction.
     function execute(address destination, uint value, bytes memory data, uint gasLimit) external approvalsMet(value) {
-        _execute(destination, value, data, gasLimit);
-    }
-
-    // Executes the wrapped transaction.
-    function _execute(address destination, uint value, bytes memory data, uint gasLimit) private {
         nonce = nonce + 1;
         bool success = false;
         assembly { success := call(gasLimit, destination, value, add(data, 0x20), mload(data), 0, 0) }
