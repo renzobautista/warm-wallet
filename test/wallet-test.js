@@ -10,9 +10,10 @@ const DAILY_LIMIT = 2000;
 
 const SALT = "0x65d55b653f260c74ea61ec761ba036f46d9ad02a0ebb14699b58d3fcda7fe2f0";
 const CHAIN_ID = 1;
+const WALLET_ID = 0;
 let DOMAIN;
 const TRANSACTION_TYPES = {
-    DemoWarmWalletTransaction: [
+    WarmWalletTransaction: [
         { name: "destination", type: "address" },
         { name: "value", type: "uint256" },
         { name: "data", type: "bytes" },
@@ -25,19 +26,40 @@ const TRANSACTION_TYPES = {
 const GAS_LIMIT = 100000;
 const TX_DATA = "0x";
 
-describe("DemoWarmWallet", function () {
+const WARM_WALLET_ABI = [
+    "function nonce() view returns (uint)",
+    "function transactionLimit() view returns (uint)",
+    "function dailyLimit() view returns (uint)",
+    "function requiresAdminApproval(uint value) view returns (bool)",
+    "function execute(uint8 sigV, bytes32 sigR, bytes32 sigS, address destination, uint value, bytes memory data, uint gasLimit)",
+    "function eject(address _memberAddress)",
+    "function addMember(address _memberAddress)",
+    "function replace(address _oldMember, address _newMember)",
+    "function updateTransactionLimit(uint _newLimit)",
+    "function updateDailyLimit(uint _newLimit)"
+];
+
+describe("WarmWallet", function () {
     async function setup() {
         const signers = await ethers.getSigners();
         const admin = signers[0];
         const member = signers[1];
         const unauthorized = signers[2];
 
-        const DemoWarmWallet = await ethers.getContractFactory("DemoWarmWallet");
-        const wallet = await DemoWarmWallet.deploy(admin.address, member.address, TRANSACTION_LIMIT, DAILY_LIMIT, CHAIN_ID);
-        await wallet.deployed();
+        const WarmWalletFactory = await ethers.getContractFactory("WarmWalletFactory");
+        const factory = await WarmWalletFactory.deploy(CHAIN_ID, 100);
+
+        const newWalletTxn = await factory.connect(admin).createWallet(
+            admin.address, member.address, TRANSACTION_LIMIT, DAILY_LIMIT, { value: 100 }
+        );
+        const newWalletReceipt = await newWalletTxn.wait();
+        const event = newWalletReceipt.events.find(event => event.event === "NewWarmWallet");
+        const [walletAddr] = event.args;
+
+        const wallet = new ethers.Contract(walletAddr, WARM_WALLET_ABI, waffle.provider);
 
         DOMAIN = {
-            name: "DemoWarmWallet",
+            name: "WarmWallet" + WALLET_ID,
             version: "1",
             chainId: CHAIN_ID.toString(),
             verifyingContract: wallet.address,
