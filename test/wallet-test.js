@@ -58,10 +58,6 @@ describe("WarmWallet", function () {
 
         const wallet = new ethers.Contract(walletAddr, WARM_WALLET_ABI, waffle.provider);
 
-        // const WarmWallet = await ethers.getContractFactory("WarmWallet");
-        // const wallet = await WarmWallet.deploy(admin.address, member.address, TRANSACTION_LIMIT, DAILY_LIMIT, CHAIN_ID, WALLET_ID);
-        // await wallet.deployed();
-
         DOMAIN = {
             name: "WarmWallet" + WALLET_ID,
             version: "1",
