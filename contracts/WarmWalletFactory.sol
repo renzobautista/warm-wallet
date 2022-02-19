@@ -5,10 +5,12 @@ import "./WarmWallet.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract WarmWalletFactory is Ownable {
+    event NewWarmWallet(address walletAddr);
+
     uint chainId;
-    uint fee;
-    address[] wallets;
-    mapping (address => address) walletCreator;
+    uint public fee;
+    address[] public wallets;
+    mapping (address => address) public walletCreator;
 
     constructor(uint _chainId, uint _fee) Ownable() {
         chainId = _chainId;
@@ -27,6 +29,7 @@ contract WarmWalletFactory is Ownable {
         wallets.push(walletAddr);
         walletCreator[walletAddr] = msg.sender;
 
+        emit NewWarmWallet(walletAddr);
         return wallet;
     }
 
