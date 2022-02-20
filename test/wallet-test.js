@@ -2,6 +2,7 @@ const { expect, use } = require("chai");
 const chaiAsPromised = require("chai-as-promised");
 const { ethers, waffle } = require("hardhat");
 const { BigNumber } = require("@ethersproject/bignumber");
+const WarmWallet = require("../artifacts/contracts/WarmWallet.sol/WarmWallet.json");
 
 use(chaiAsPromised);
 
@@ -26,19 +27,6 @@ const TRANSACTION_TYPES = {
 const GAS_LIMIT = 100000;
 const TX_DATA = "0x";
 
-const WARM_WALLET_ABI = [
-    "function nonce() view returns (uint)",
-    "function transactionLimit() view returns (uint)",
-    "function dailyLimit() view returns (uint)",
-    "function requiresAdminApproval(uint value) view returns (bool)",
-    "function execute(uint8 sigV, bytes32 sigR, bytes32 sigS, address destination, uint value, bytes memory data, uint gasLimit)",
-    "function eject(address _memberAddress)",
-    "function addMember(address _memberAddress)",
-    "function replace(address _oldMember, address _newMember)",
-    "function updateTransactionLimit(uint _newLimit)",
-    "function updateDailyLimit(uint _newLimit)"
-];
-
 describe("WarmWallet", function () {
     async function setup() {
         const signers = await ethers.getSigners();
@@ -56,7 +44,7 @@ describe("WarmWallet", function () {
         const event = newWalletReceipt.events.find(event => event.event === "NewWarmWallet");
         const [walletAddr] = event.args;
 
-        const wallet = new ethers.Contract(walletAddr, WARM_WALLET_ABI, waffle.provider);
+        const wallet = new ethers.Contract(walletAddr, WarmWallet.abi, waffle.provider);
 
         DOMAIN = {
             name: "WarmWallet" + WALLET_ID,
