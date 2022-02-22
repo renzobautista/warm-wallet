@@ -4,6 +4,7 @@ import { Alert, AlertIcon, ChakraProvider } from "@chakra-ui/react";
 import type { AppProps } from "next/app";
 import Head from "next/head";
 import React, { useState } from "react";
+import { CookiesProvider } from "react-cookie";
 import Web3 from 'web3'
 
 const CONTRACT_CHAIN_ID = parseInt(process.env.CHAIN_ID ?? "0")
@@ -16,6 +17,7 @@ function MyApp({ Component, pageProps }: AppProps) {
   }, 500);
 
   return (
+    <CookiesProvider>
     <ChakraProvider>
       {chainId != CONTRACT_CHAIN_ID && (
         <Alert status="error">
@@ -29,6 +31,7 @@ function MyApp({ Component, pageProps }: AppProps) {
       </Head>
       <Component {...pageProps} />
     </ChakraProvider>
+    </CookiesProvider>
   )
 }
 

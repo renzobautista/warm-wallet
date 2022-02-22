@@ -1,8 +1,19 @@
 import { Button, VStack } from "@chakra-ui/react";
 import type { NextPage } from "next";
 import Link from "next/link";
+import Router from "next/router";
+import { useEffect } from "react";
+import { withCookies } from "react-cookie";
+import { WARM_WALLET_ADDRESS } from "../app/cookies";
 
-const Home: NextPage = () => {
+const Home: NextPage = ({ cookies }) => {
+  useEffect(() => {
+    let walletAddr: string | undefined = cookies.get(WARM_WALLET_ADDRESS);
+    if (walletAddr != undefined) {
+      Router.push("/dashboard");
+    }
+  }, []);
+
   return (
     <VStack spacing="24px">
       <Link href="/create">
@@ -13,4 +24,4 @@ const Home: NextPage = () => {
   )
 }
 
-export default Home
+export default withCookies(Home)

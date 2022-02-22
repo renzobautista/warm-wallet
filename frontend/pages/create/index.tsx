@@ -9,11 +9,14 @@ import {
   Text,
   VStack
 } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
 import type { NextPage } from "next";
+import Router from 'next/router'
+import { useEffect, useState } from "react";
+import { withCookies } from 'react-cookie'
 import Web3 from 'web3'
+import { WARM_WALLET_ADDRESS } from "../../app/cookies";
 
-const Create: NextPage = () => {
+const Create: NextPage = ({ cookies }) => {
   const [adminAddress, setAdminAddress] = useState("");
   const [memberAddress, setMemberAddress] = useState("");
   const [transactionLimit, setTransactionLimit] = useState("");
@@ -47,10 +50,10 @@ const Create: NextPage = () => {
       setErrors(errorList);
       return;
     }
-    if (adminAddress != currentAccount) {
+    if (adminAddress.toLowerCase() != currentAccount.toLowerCase()) {
       errorList.push("Admin is not the current user.");
     }
-    if (adminAddress === memberAddress) {
+    if (adminAddress.toLowerCase() === memberAddress.toLowerCase()) {
       errorList.push("Admin is the same as member.");
     }
     if (memberAddress === "") {
@@ -76,10 +79,9 @@ const Create: NextPage = () => {
     contract.methods.createWallet(adminAddress, memberAddress, transactionLimitWei, dailyLimitWei)
       .send({ from: adminAddress, value: web3.utils.toWei("1") })
       .on("receipt", (receipt: any) => {
-        console.log(receipt);
-        console.log(receipt.events);
         const walletAddr = receipt.events.NewWarmWallet.returnValues.walletAddr;
-        console.log(walletAddr);
+        cookies.set(WARM_WALLET_ADDRESS, walletAddr);
+        Router.push("/dashboard")
       })
       .on("error", (error: any) => {
         console.log(error);
@@ -129,4 +131,4 @@ const Create: NextPage = () => {
   )
 }
 
-export default Create
+export default withCookies(Create)
