@@ -1,5 +1,5 @@
-import WarmWalletFactory from "../../../artifacts/contracts/WarmWalletFactory.sol/WarmWalletFactory.json";
-import { useInterval } from "../../app/hooks";
+import { WARM_WALLET_ADDRESS } from "../../app/cookies";
+import { web3, factoryContract } from "../../app/web3utils";
 import {
   Alert,
   AlertIcon,
@@ -7,14 +7,13 @@ import {
   Heading,
   Input,
   Text,
+  useInterval,
   VStack
 } from "@chakra-ui/react";
 import type { NextPage } from "next";
 import Router from 'next/router'
 import { useEffect, useState } from "react";
 import { withCookies } from 'react-cookie'
-import Web3 from 'web3'
-import { WARM_WALLET_ADDRESS } from "../../app/cookies";
 
 const Create: NextPage = ({ cookies }) => {
   const [adminAddress, setAdminAddress] = useState("");
@@ -26,10 +25,6 @@ const Create: NextPage = ({ cookies }) => {
   const [fee, setFee] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
-  const web3: Web3 = new Web3(Web3.givenProvider);
-  const contractAddress: string = process.env.FACTORY_CONTRACT_ADDRESS ?? "";
-  const contract = new web3.eth.Contract(WarmWalletFactory.abi, contractAddress);
-
   useInterval(() => {
     web3.eth.requestAccounts().then(accts => {
       if (accts.length > 0) {
@@ -38,7 +33,7 @@ const Create: NextPage = ({ cookies }) => {
     })
   }, 500);
   useInterval(() => {
-    contract.methods.fee().call().then((fee: any) => {
+    factoryContract.methods.fee().call().then((fee: any) => {
       setFee(web3.utils.fromWei(fee));
     })
   }, 500);
@@ -69,14 +64,10 @@ const Create: NextPage = ({ cookies }) => {
   }, [adminAddress, memberAddress, transactionLimit, dailyLimit, currentAccount]);
 
   const submit = () => {
-    if (contractAddress === "") {
-      console.log("No deployed contract address");
-      return
-    }
     const transactionLimitWei = web3.utils.toWei(transactionLimit);
     const dailyLimitWei = web3.utils.toWei(dailyLimit);
     setSubmitted(true);
-    contract.methods.createWallet(adminAddress, memberAddress, transactionLimitWei, dailyLimitWei)
+    factoryContract.methods.createWallet(adminAddress, memberAddress, transactionLimitWei, dailyLimitWei)
       .send({ from: adminAddress, value: web3.utils.toWei("1") })
       .on("receipt", (receipt: any) => {
         const walletAddr = receipt.events.NewWarmWallet.returnValues.walletAddr;
