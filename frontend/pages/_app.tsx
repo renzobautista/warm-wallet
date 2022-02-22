@@ -1,6 +1,5 @@
 import "../styles/globals.css"
-import { useInterval } from "../app/hooks";
-import { Alert, AlertIcon, ChakraProvider } from "@chakra-ui/react";
+import { Alert, AlertIcon, ChakraProvider, useInterval } from "@chakra-ui/react";
 import type { AppProps } from "next/app";
 import Head from "next/head";
 import React, { useState } from "react";

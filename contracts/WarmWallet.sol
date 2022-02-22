@@ -34,12 +34,16 @@ contract WarmWallet {
     // Daily transaction limit.
     uint public dailyLimit;
 
-    constructor(address _admin, address _member, uint _transactionLimit, uint _dailyLimit, uint chainId, uint walletId) {
+    // Wallet ID
+    uint public walletId;
+
+    constructor(address _admin, address _member, uint _transactionLimit, uint _dailyLimit, uint chainId, uint _walletId) {
         require(transactionLimit >= 0 && dailyLimit >= 0 && _admin != _member);
         roles[_admin] = Role.ADMIN;
         roles[_member] = Role.MEMBER;
         transactionLimit = _transactionLimit;
         dailyLimit = _dailyLimit;
+        walletId = _walletId;
         // Hash of "WarmWallet" + walletId, e.g. "WarmWallet0".
         bytes32 nameHash = keccak256(abi.encodePacked(string(abi.encodePacked(WALLET_NAME_PREFIX, Strings.toString(walletId)))));
         NAME_HASH = nameHash;
@@ -124,6 +128,10 @@ contract WarmWallet {
     // Approximation for "daily limits" using 1 day blocks starting from epoch.
     function today() view private returns (uint) {
         return block.timestamp / 1 days;
+    }
+
+    function role(address _address) public view returns (Role) {
+        return roles[_address];
     }
 
     receive() external payable {}

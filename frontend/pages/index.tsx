@@ -1,10 +1,10 @@
+import { WARM_WALLET_ADDRESS } from "../app/cookies";
 import { Button, VStack } from "@chakra-ui/react";
 import type { NextPage } from "next";
 import Link from "next/link";
 import Router from "next/router";
 import { useEffect } from "react";
 import { withCookies } from "react-cookie";
-import { WARM_WALLET_ADDRESS } from "../app/cookies";
 
 const Home: NextPage = ({ cookies }) => {
   useEffect(() => {
