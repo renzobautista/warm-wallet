@@ -5,7 +5,7 @@ import "./WarmWallet.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract WarmWalletFactory is Ownable {
-    event NewWarmWallet(address walletAddr);
+    event NewWarmWallet(address walletAddr, address creator);
 
     uint chainId;
     uint public fee;
@@ -29,7 +29,7 @@ contract WarmWalletFactory is Ownable {
         wallets.push(walletAddr);
         walletCreator[walletAddr] = msg.sender;
 
-        emit NewWarmWallet(walletAddr);
+        emit NewWarmWallet(walletAddr, _admin);
         return wallet;
     }
 

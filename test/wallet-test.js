@@ -42,7 +42,9 @@ describe("WarmWallet", function () {
         );
         const newWalletReceipt = await newWalletTxn.wait();
         const event = newWalletReceipt.events.find(event => event.event === "NewWarmWallet");
-        const [walletAddr] = event.args;
+        const [walletAddr, creator] = event.args;
+
+        expect(creator).to.equal(admin.address);
 
         const wallet = new ethers.Contract(walletAddr, WarmWallet.abi, waffle.provider);
 
