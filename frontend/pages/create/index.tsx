@@ -1,3 +1,4 @@
+import WarmWalletFactory from "../../../artifacts/contracts/WarmWalletFactory.sol/WarmWalletFactory.json";
 import { useInterval } from "../../app/hooks";
 import {
   Alert,
@@ -5,6 +6,7 @@ import {
   Button,
   Heading,
   Input,
+  Text,
   VStack
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
@@ -18,13 +20,23 @@ const Create: NextPage = () => {
   const [dailyLimit, setDailyLimit] = useState("");
   const [errors, setErrors] = useState<Array<string>>([]);
   const [currentAccount, setCurrentAccount] = useState("");
+  const [fee, setFee] = useState("");
+  const [submitted, setSubmitted] = useState(false);
 
   const web3: Web3 = new Web3(Web3.givenProvider);
+  const contractAddress: string = process.env.FACTORY_CONTRACT_ADDRESS ?? "";
+  const contract = new web3.eth.Contract(WarmWalletFactory.abi, contractAddress);
+
   useInterval(() => {
     web3.eth.requestAccounts().then(accts => {
       if (accts.length > 0) {
         setCurrentAccount(accts[0]);
       }
+    })
+  }, 500);
+  useInterval(() => {
+    contract.methods.fee().call().then((fee: any) => {
+      setFee(web3.utils.fromWei(fee));
     })
   }, 500);
 
@@ -44,11 +56,34 @@ const Create: NextPage = () => {
     if (memberAddress === "") {
       errorList.push("Member is empty.");
     }
+    if (transactionLimit === "") {
+      errorList.push("Transaction limit is empty.")
+    }
+    if (dailyLimit === "") {
+      errorList.push("Daily limit is empty.")
+    }
     setErrors(errorList);
   }, [adminAddress, memberAddress, transactionLimit, dailyLimit, currentAccount]);
 
   const submit = () => {
-    console.log("SUBMIT");
+    if (contractAddress === "") {
+      console.log("No deployed contract address");
+      return
+    }
+    const transactionLimitWei = web3.utils.toWei(transactionLimit);
+    const dailyLimitWei = web3.utils.toWei(dailyLimit);
+    setSubmitted(true);
+    contract.methods.createWallet(adminAddress, memberAddress, transactionLimitWei, dailyLimitWei)
+      .send({ from: adminAddress, value: web3.utils.toWei("1") })
+      .on("receipt", (receipt: any) => {
+        console.log(receipt);
+        console.log(receipt.events);
+        const walletAddr = receipt.events.NewWarmWallet.returnValues.walletAddr;
+        console.log(walletAddr);
+      })
+      .on("error", (error: any) => {
+        console.log(error);
+      });
   }
 
   return (
@@ -88,7 +123,8 @@ const Create: NextPage = () => {
           })}
         </VStack>
       )}
-      <Button disabled={errors.length > 0} onClick={submit}>Create Wallet</Button>
+      <Text>Fee: {fee} ETH</Text>
+      <Button disabled={errors.length > 0 || submitted} onClick={submit}>Create Wallet</Button>
     </VStack>
   )
 }
